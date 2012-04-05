@@ -1,0 +1,130 @@
+
+body {
+    background-color:#6699FF;
+}
+
+div.box {
+    margin:5%;
+    margin-left:7%;
+}
+
+div.tagbox {
+    margin:1%;
+    height:432px;
+    width:700px;
+    background:#333;
+    padding:15px 20px;
+    color:#eee;
+    margin:0;
+    border-radius: 6px;
+}
+
+div.box h1 {
+    text-indent:7%;
+    font-size:30px;
+}
+
+div.box .tag {
+    width:30%;
+    height:29%;
+    border:1px transparent;
+    float:left;
+    margin:2%;
+    margin-top:1%;
+    margin-bottom:1%;
+}
+
+div.box .rht {
+    margin-right:0;
+    font-size:18px;
+    line-height:100px;
+}
+
+div.box .lft {
+    margin-left:0px;
+}
+
+div.topbox {
+    background-color:#333;
+    border:1px solid white;
+    display:none;
+    position:absolute;
+    border-radius: 6px;
+}
+
+.logregform {
+    display:none;
+    z-index:10000;
+    background-color:#333;
+    border:1px solid #666;
+    width:400px;
+    height:309px;
+    opacity:0.8;
+    -moz-box-shadow:0 0 90px 5px #000;
+    -webkit-box-shadow: 0 0 90px #000;
+}
+
+div.tag p {
+    text-indent:10%;
+    font-size:200%;
+}
+
+div.green {
+    background-color:GreenYellow;
+}
+
+div.green:hover {
+    cursor:pointer;
+    background-color:GoldenRod;
+}
+
+div.blue {
+    cursor:pointer;
+    background-color:DeepSkyBlue;
+}
+
+div.blue:hover {
+    cursor:pointer;
+    background-color:#CC66FF;
+}
+
+div.red {
+    background-color:OrangeRed;
+}
+
+div.red:hover {
+    cursor:pointer;
+    background-color:BlueViolet;
+}
+
+div.black {
+    background-color:black;
+    font-size:50px;
+    line-height:120px;
+    text-align:center;
+    overflow:hidden;
+}
+
+div.black:hover {
+    cursor:pointer;
+    background-color:Orange;
+}
+
+div.formal {
+    background-color:LightBlue;
+}
+
+div.formal:hover {
+    cursor:pointer;
+    background-color:Khaki;
+}
+
+div.hotpoint {
+    background-color:orange;
+}
+
+div.hotpoint:hover {
+    cursor:pointer;
+    background-color:LightSeaGreen;
+}
+

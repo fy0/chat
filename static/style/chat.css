@@ -1,0 +1,61 @@
+
+.chatbox {
+    height:85%;
+}
+
+.sendmsg {
+    float:bottom;
+    width:99%;
+    height:15%;
+    border:1px solid white;
+}
+
+#sendbtn {
+    float:right;
+    width:12%;
+    height:100%;
+    text-align:center;
+    line-height:50px;
+}
+
+#sendbtn:hover {
+    background-color:GoldenRod;
+    cursor:pointer;
+}
+
+.msgitem {
+    font-size:12px;
+    margin:10px 0;
+    width:420px;
+    padding:15px;
+    font-size:12px;
+    height:auto;
+}
+
+.msgitem img {
+    float:left;
+    border:1px solid white;
+    height:64px;
+    width:64px;
+}
+
+div.msgitem div {
+    border:1px solid white;
+    width:100%;
+    height:64px;
+}
+
+/* 滚动效果设置 */
+.vertical {
+    position:relative;
+    overflow:hidden;
+    height: 85%;
+    width:100%;
+}
+
+.items {
+    position:absolute;
+    height:20000em;
+    margin: 0px;
+}
+

@@ -1,0 +1,140 @@
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+    <head>
+        <title>聊天室</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+        <script src="{{static_url('js/jquery.tools.min.js')}}"></script>
+        <script src="{{static_url('js/funcs.js')}}"></script>
+        <link rel="stylesheet" type="text/css" href="{{static_url('style/reset.css')}}"/>
+        <link rel="stylesheet" type="text/css" href="{{static_url('style/index.css')}}"/>
+        <link rel="stylesheet" type="text/css" href="{{static_url('style/chat.css')}}"/>
+    </head>
+    <body>
+        <div class="box">
+            <h1>聊天室：测试版本</h1>
+            <div id="tagbox" class="tagbox" rel="#topbox">
+                <div id="t1" class="tag black lft">
+                    <strong>?</strong>
+                </div>
+                <div id="t2" class="tag black">
+                    <strong>?</strong>
+                </div>
+                <div id="user" class="tag green rht" rel="#logregform">
+                    <p><strong><font color="black">User</font></strong></p>
+                </div>
+                <div id="t3" class="tag black lft">
+                    <strong>?</strong>
+                </div>
+                <div id="t4" class="tag black">
+                    <strong>?</strong>
+                </div>
+                <div id="about" class="tag blue rht">
+                    <p><strong>About</strong></p>
+                </div>
+                <div id="t5" class="tag black lft">
+                    <strong>?</strong>
+                </div>
+                <div id="t6" class="tag black">
+                    <strong>?</strong>
+                </div>
+                <div id="quit" class="tag red rht">
+                    <p><strong>Quit</strong></p>
+                </div>
+                <div class="topbox" id="topbox">
+                    <!-- -->
+                </div>
+                <div class="logregform" id="logregform">
+                    <!-- 登录/注册窗口 -->
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+
+<script type="text/javascript">
+    $(document).ready(jqueryinit);
+
+function showtopbox() {
+    $("#topbox").html("");
+    $("#topbox").width($("#tagbox").width()*0.66);
+    $("#topbox").height($("#tagbox").height()-26);
+    $("#topbox").show('slow');
+}
+
+function leaveroom() {
+    $("#quit>p").text("Quit");
+    $("#quit").unbind("click",leaveroom);
+    $(this).bind("click",quitclick);
+    $(".tag:not(.rht)").fadeTo("slow",1);
+    $("#topbox").hide();
+    $.post("/chat/room/"+room,{'cmd':'LEAVE','user':user});
+    recvOn = false;
+}
+
+function itemclick() {
+    if (!user) {
+        $("#user").click();
+    } else {
+        room = this.id[1];
+        $(".tag:not(.rht)").fadeTo("slow",0);
+        //$("div.tag:not(.rht,#"+this.id+")").fadeTo("slow",0);
+        $.post("/chat/room/"+room,{'cmd':'ENTER','user':user,'room':room});
+        $.get("/form/chat",cb_showchatwindow);
+        //$(this).fadeTo('slow',0);
+        showtopbox();
+        $("#quit>p").text("Back");
+        $("#quit").unbind("click");
+        $("#quit").click(leaveroom);
+        recvOn = true;
+    }
+}
+
+function cb_showchatwindow(result) {
+    $("#topbox").html(result);
+}
+
+function cb_about(result) {
+    $("#topbox").html(result);
+}
+
+function jqueryinit() {
+    // 设置事件
+    $('#user').click(userclick);
+    $("#about").click(aboutclick);
+    $("#quit").click(quitclick);
+    $(".tag:not(.rht)").click(itemclick);
+
+    // 设置全局变量
+    user = '';
+
+    // 设置浮动层
+    $("#user[rel]").overlay({mask: '#000',top:'25%',left:'20%'});
+    getroominfo();
+}
+
+// 获取房间信息
+function getroominfo() {
+    // TODO
+}
+
+function userclick() {
+    $('#logregform').html('');
+    $.get("/form/login",function(ret){$('#logregform').html(ret);});
+}
+
+function aboutclick() {
+    showtopbox();
+    $.get("/form/about",cb_about);
+    $("#quit>p").text("Back");
+    $("#quit").unbind("click");
+    $("#quit").click(leaveroom);
+}
+
+function quitclick() {
+    window.close();
+}
+
+</script>
+

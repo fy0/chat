@@ -1,0 +1,115 @@
+<head>
+    <style>
+        #borderbox {
+            width:500px;
+            height:200px;
+            margin:50px;
+        }
+        #loginform {
+            width:70%;
+            position:absolute;
+            padding:20px;
+        }
+
+        #loginform p {
+            font-size:15px;
+            color:white;
+            text-align:left;
+        }
+
+        #topline {
+            margin-bottom:10px;
+        }
+
+        #loginform input {
+            margin-top:10px;
+            border:1px solid #444;
+            background-color:#666;
+            padding:5px;
+            color:#ddd;
+            font-size:12px;
+            width:95%;
+
+            /* CSS3 spicing */
+            text-shadow:1px 1px 1px #000;
+            -moz-border-radius:4px;
+            -webkit-border-radius:4px;
+        }
+
+        #loginform input:focus { color:#fff; background-color:#777; }
+        #loginform input:active { background-color:#888; }
+
+        #loginform button {
+            width:100%;
+            height:20%;
+            outline:0;
+            border:1px solid #666;
+            font-size:15px;
+        }
+
+        #logmsg {
+            position:relative;
+            top:15px;
+            font-size:15px;
+        }
+
+    </style>
+</head>
+
+<div id="borderbox">
+    <div id="loginform">
+        <p id="topline"><span id="yourname">输入你的名字:  </span><input id="usr"/></p>
+        <button id="btnEnter" onclick="login();" title="开始">Enter</button>
+        <a id="logmsg"></a>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function (){
+        if (user) {
+            $('#yourname').text('换个名字？ ');
+        }
+        $('#usr').focus();
+        $('#usr').keypress(function(event) {
+            if (event.keyCode == 13) login();
+        });
+    });
+
+function logintext(text,css) {
+    var logmsg = $('#logmsg');
+    css = css || 'normal';
+    if (css==='normal') logmsg.css('color','rgb(150,255,100)');
+    else if (css==='red') logmsg.css('color','rgb(250,100,50)');
+    logmsg.show();
+    logmsg.text(text);
+    logmsg.fadeOut(3000);
+}
+
+function login() {
+    var usr = $('#usr').attr('value').trim();
+
+    if (!usr) {
+        logintext('输入内容为空！');
+        $('#usr').attr('value','');
+        $('#usr').focus();
+        return;
+    }
+
+    // 若之前已经有了用户名，改名
+    // 若没有，添加新的
+    var param = {};
+    if (user) param = {"oldusr":user,"user":usr};
+    else param = {"user":usr};
+
+    $.post("/login",param,function(ret){
+        if (ret=='+ERR 101') logintext('登录失败，用户名已被占用','red');
+        else if (ret=='+OK 100') {
+            user = usr;
+            logintext('登录成功，请稍候...');
+            setTimeout("$('#user').overlay().close();",500);
+        }
+    });
+}
+
+</script>
+

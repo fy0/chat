@@ -1,0 +1,82 @@
+
+<div class="scrollable vertical">
+    <div class="items"> 
+        <!-- messages here -->
+    </div>
+</div>
+
+<div class="sendmsg">
+    <textarea id="msgtext" style="width:87%;height:88%;"></textarea>
+    <a id="sendbtn" onclick="sendclick();">发送</a>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(jqueryinit);
+
+    function getmsg() {
+        if (!recvOn) return;
+        $.ajax({
+                url:"/chat/msg/"+room,
+                type:"GET",
+                data:{'user':user},
+                success:function(data){
+                    if (!data) {
+                        setTimeout(getmsg,1000);
+                        return;
+                    }
+                    var info = eval('('+data+')');
+                    if (info['user']!=user)
+                        addmsg(info['user'],info['msg']);
+                    setTimeout(getmsg,50);
+                },
+                error: function(req,sta,er){
+                    setTimeout(getmsg,10000);
+                },
+            });
+    }
+
+    function jqueryinit() {
+        if (!user) {
+        }
+        $(".scrollable").scrollable({ vertical: true, mousewheel: true });
+        scrollapi = $(".scrollable").data("scrollable");
+        scrollapi.end("slow");
+        $('#msgtext').focus();
+        $('#msgtext').keypress(function(event) {
+            if (event.keyCode == 13) sendclick();
+        });
+        getmsg();
+    }
+
+function addmsg(user,text,time) {
+    var item = $("<div class='msgitem'></div>");
+    var img = $('<img src="{{static_url('image/icon_admin.png')}}"></img>');
+    var div = $("<div style='display:none'>"+user+" : "+text+"</div>");
+    item.append(img);
+    item.append(div);
+    scrollapi.addItem(item);
+    div.fadeTo("slow",1);
+}
+
+function sendclick() {
+    var msg = $("#msgtext").attr("value");
+    if (msg) {
+        if (!user) {
+            $("#user").click();
+            return;
+        }
+        addmsg(user,msg);
+        $.post("/chat/msg/"+room,{'user':user,'msg':msg},
+                function(result){
+                    if (result=='+ERR 102') addmsg('系统','上一条消息发送失败');
+                });
+        $("#msgtext").attr("value","");
+        scrollapi.end("slow");
+    } else {
+        // 准备一个 tooltip;
+        alert("输入内容不能为空！");
+    }
+}
+
+</script>
+
