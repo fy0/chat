@@ -4,6 +4,7 @@ import tornado.web
 
 class index(tornado.web.RequestHandler):
     def get(self):
+        self.set_cookie('room','')
         self.render('main.html');
 
 class about(tornado.web.RequestHandler):
