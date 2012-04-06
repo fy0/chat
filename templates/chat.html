@@ -16,7 +16,7 @@
     function getmsg() {
         if (!recvOn) return;
         $.ajax({
-                url:"/chat/msg/"+room,
+                url:"/chat/msg",
                 type:"GET",
                 data:{'user':user},
                 success:function(data){
@@ -40,11 +40,20 @@
         }
         $(".scrollable").scrollable({ vertical: true, mousewheel: true });
         scrollapi = $(".scrollable").data("scrollable");
-        scrollapi.end("slow");
         $('#msgtext').focus();
         $('#msgtext').keypress(function(event) {
             if (event.keyCode == 13) sendclick();
         });
+        if (premsgs) {
+            var i;
+            i = 0;
+            for (i=0;i<premsgs.length;i++) {
+                if (premsgs[i][0]!='系统消息')
+                    addmsg(premsgs[i][0],premsgs[i][1]);
+            }
+            premsgs = 0;
+            scrollapi.end("slow");
+        }
         getmsg();
     }
 
@@ -66,7 +75,7 @@ function sendclick() {
             return;
         }
         addmsg(user,msg);
-        $.post("/chat/msg/"+room,{'user':user,'msg':msg},
+        $.post("/chat/msg",{'user':user,'msg':msg},
                 function(result){
                     if (result=='+ERR 102') addmsg('系统','上一条消息发送失败');
                 });

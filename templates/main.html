@@ -80,7 +80,9 @@ function itemclick() {
         room = this.id[1];
         $(".tag:not(.rht)").fadeTo("slow",0);
         //$("div.tag:not(.rht,#"+this.id+")").fadeTo("slow",0);
-        $.post("/chat/room/"+room,{'cmd':'ENTER','user':user,'room':room});
+        $.post("/chat/room",{'cmd':'ENTER','user':user,'room':room},function(ret) {
+                premsgs = eval('('+ret+')');
+            });
         $.get("/form/chat",cb_showchatwindow);
         //$(this).fadeTo('slow',0);
         showtopbox();
@@ -111,6 +113,10 @@ function jqueryinit() {
 
     // 设置浮动层
     $("#user[rel]").overlay({mask: '#000',top:'25%',left:'20%'});
+    $.get('/login',function(ret) {
+            user = ret['user'];
+            room = ret['room'];
+        });
     getroominfo();
 }
 

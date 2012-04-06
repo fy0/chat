@@ -1,11 +1,16 @@
 # coding=utf-8
 
+from __future__ import unicode_literals
 import tornado.web
 import time,json,re
 
-import logic
-from logic import users
+import record
+from record import db
+from record import users
 from session import Session
+
+def sysmsg(room,text):
+    msg.send_msg(room,'系统消息',text,int(time.time()))
 
 class room(tornado.web.RequestHandler):
     # 获取房间信息
@@ -21,11 +26,17 @@ class room(tornado.web.RequestHandler):
             uuid = self.get_secure_cookie('alice')
             if not uuid:return
             session = Session(uuid)
-            session['room'] = self.get_argument('room')
+            room = session['room'] = self.get_argument('room')
+            # 返回前20条聊天记录，时间限制在30分钟内。
+            self.write(json.dumps(record.getchatrecord(room,20)))
         elif _cmd == 'LEAVE':
             uuid = self.get_secure_cookie('alice')
             if not uuid:return
             session = Session(uuid)
+            room = session['room']
+            user = session['user']
+            del users[room][user]
+            sysmsg(room,'用户 '+user+' 离开房间')
             session['room'] = None
 
 # 收发消息
@@ -33,7 +44,7 @@ class msg(tornado.web.RequestHandler):
     callbacks = {}
 
     @tornado.web.asynchronous
-    def get(self,room):
+    def get(self):
         # 初始化 session
         uuid = self.get_secure_cookie('alice')
         if not uuid:return
@@ -51,12 +62,9 @@ class msg(tornado.web.RequestHandler):
         # 新用户
         if not user in users[room]:
             users[room][user] = []
-            try:
-                self.send_msg(room,'系统消息','用户'+user.encode('utf-8')+'进入房间',int(time.time()))
-            except:
-                self.send_msg(room,'系统消息','用户'+user+'进入房间',int(time.time()))
+            sysmsg(room,'用户 '+user+' 进入房间')
 
-    def post(self,room):
+    def post(self):
         # 初始化 session
         uuid = self.get_secure_cookie('alice')
         if not uuid:return
@@ -69,10 +77,13 @@ class msg(tornado.web.RequestHandler):
         _time = int(time.time())
         self.send_msg(_room,_user,_msg,_time)
 
-    def send_msg(self,room,usr,msg,time):
-        for callback in self.callbacks[room]:
-            callback(usr,msg,time)
-        self.callbacks[room] = set()
+    @staticmethod
+    def send_msg(room,usr,msgtext,time):
+        db.query('insert into chat(room,user,time,msg) values(?,?,?,?)',(room,usr,time,msgtext))
+        db.commit()
+        for callback in msg.callbacks[room]:
+            callback(usr,msgtext,time)
+        msg.callbacks[room] = set()
 
     def on_new_msg(self,usr,msg,time):
         if self.request.connection.stream.closed():

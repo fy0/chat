@@ -1,13 +1,21 @@
 # coding:utf-8
 
+from __future__ import unicode_literals
 import tornado.web
 import uuid
 
-import logic
-from logic import users
+from record import users
 from session import Session
+from chat import sysmsg
 
 class login(tornado.web.RequestHandler):
+    # 获取信息，检查是否存有 session 等等
+    def get(self):
+        _uuid = self.get_secure_cookie('alice')
+        if _uuid:
+            session = Session(_uuid)
+            self.finish({'user':session['user'],'room':session['room']})
+
     def post(self):
         self.set_header('Content-Type','text/plain')
         user = self.get_argument('user')
@@ -30,5 +38,6 @@ class login(tornado.web.RequestHandler):
         if room and oldusr:
             users[room][user] = users[room][oldusr]
             del users[room][oldusr]
+            sysmsg(room,'注意： '+oldusr+' 更名为 '+user)
         self.write('+OK 100')
 
