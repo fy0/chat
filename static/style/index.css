@@ -64,6 +64,11 @@ div.topbox {
     -webkit-box-shadow: 0 0 90px #000;
 }
 
+#statbar {
+    display:none;
+    float:left;
+}
+
 div.tag p {
     text-indent:10%;
     font-size:200%;
@@ -88,8 +93,21 @@ div.blue:hover {
     background-color:#CC66FF;
 }
 
+.activeItemText {
+    margin:20px;
+    margin-left:20px;
+}
+
+.activeItemText h2{
+    font-size:35px;
+}
+
 div.red {
     background-color:OrangeRed;
+}
+
+.red .title {
+    ;
 }
 
 div.red:hover {
@@ -108,15 +126,6 @@ div.black {
 div.black:hover {
     cursor:pointer;
     background-color:Orange;
-}
-
-div.formal {
-    background-color:LightBlue;
-}
-
-div.formal:hover {
-    cursor:pointer;
-    background-color:Khaki;
 }
 
 div.hotpoint {

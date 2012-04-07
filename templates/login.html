@@ -107,6 +107,7 @@ function login() {
             user = usr;
             logintext('登录成功，请稍候...');
             setTimeout("$('#user').overlay().close();",500);
+            showUserinfo();
         }
     });
 }

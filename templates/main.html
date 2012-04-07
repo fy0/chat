@@ -22,7 +22,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                     <strong>?</strong>
                 </div>
                 <div id="user" class="tag green rht" rel="#logregform">
-                    <p><strong><font color="black">User</font></strong></p>
+                    <p><strong><span id="usertext" style="color:black">User</span></strong></p>
                 </div>
                 <div id="t3" class="tag black lft">
                     <strong>?</strong>
@@ -45,6 +45,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                 <div class="topbox" id="topbox">
                     <!-- -->
                 </div>
+                <div id="statbar"></div>
                 <div class="logregform" id="logregform">
                     <!-- 登录/注册窗口 -->
                 </div>
@@ -55,6 +56,16 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 
 <script type="text/javascript">
     $(document).ready(jqueryinit);
+
+function statbartext(s,fontcolor) {
+    fontcolor = fontcolor || 'rgb(180,255,20)';
+    var statbar = $('#statbar');
+    statbar.stop(true,true).hide();
+    statbar.text(s);
+    statbar.css('color',fontcolor);
+    statbar.fadeIn(1000).delay(1000);
+    statbar.fadeOut(1000);
+}
 
 function showtopbox() {
     $("#topbox").html("");
@@ -71,6 +82,7 @@ function leaveroom() {
     $("#topbox").hide();
     $.post("/chat/room/"+room,{'cmd':'LEAVE','user':user});
     recvOn = false;
+    statbartext('返回');
 }
 
 function itemclick() {
@@ -90,14 +102,16 @@ function itemclick() {
         $("#quit").unbind("click");
         $("#quit").click(leaveroom);
         recvOn = true;
+        statbartext('进入房间');
     }
 }
 
-function cb_showchatwindow(result) {
-    $("#topbox").html(result);
+function showUserinfo()
+{
+    $("#usertext").text(user);
 }
 
-function cb_about(result) {
+function cb_showchatwindow(result) {
     $("#topbox").html(result);
 }
 
@@ -116,13 +130,40 @@ function jqueryinit() {
     $.get('/login',function(ret) {
             user = ret['user'];
             room = ret['room'];
+            showUserinfo();
+            statbartext('欢迎回来');
         });
     getroominfo();
+}
+
+function activeitem(item,_itemclass) {
+    if(typeof itemclass=='undefined'){
+        itemclass = 'none';
+    }
+    /*switch(itemclass) {
+        case 'none':itemclass='blue';break;
+        case 'blue':itemclass='red';break;
+        //case 'hotpoint':itemclass='red';break;
+        case 'red':itemclass='blue';break;
+        //case 'green':itemclass='blue';break;
+        }*/
+    switch (item.attr('id')[1]) {
+        case '2':case '3':case '6':itemclass='blue';break;
+        case '1':case '4':case '5':itemclass='red';break;
+    }
+    item.removeClass('black').addClass(itemclass);
 }
 
 // 获取房间信息
 function getroominfo() {
     // TODO
+    $.get('/chat/room/',function(ret){
+            for (var x in ret) {
+                var item = $('#t'+x);
+                activeitem(item);
+                item.html('<div class="activeItemText"><h2>'+ret[x]['title']+'</h2>'+'在线人数:'+ret[x]['num']+'</div>');
+            }
+        });
 }
 
 function userclick() {
@@ -132,10 +173,13 @@ function userclick() {
 
 function aboutclick() {
     showtopbox();
-    $.get("/form/about",cb_about);
+    $.get("/form/about",function(result) {
+            $("#topbox").html(result);
+        });
     $("#quit>p").text("Back");
     $("#quit").unbind("click");
     $("#quit").click(leaveroom);
+    statbartext('关于页面');
 }
 
 function quitclick() {

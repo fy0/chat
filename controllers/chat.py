@@ -17,8 +17,15 @@ class room(tornado.web.RequestHandler):
     def get(self,room):
         if not room:
             # 返回所有信息
-            pass
-        pass
+            ret = dict()
+            for r,u in users.items():
+                ret[r] = {'title':'测试','num':len(u)}
+            self.finish(ret)
+            return
+        if not room in users:
+            self.finish('+ERR 100')
+            return 
+        self.finish({'title':'?','num':len(users[room])})
     # 进入/离开房间
     def post(self,room):
         _cmd  = self.get_argument('cmd')
@@ -26,9 +33,14 @@ class room(tornado.web.RequestHandler):
             uuid = self.get_secure_cookie('alice')
             if not uuid:return
             session = Session(uuid)
+            user = session['user']
             room = session['room'] = self.get_argument('room')
+            if not room in users:
+                users[room] = dict()
+            users[room][user] = []
             # 返回前20条聊天记录，时间限制在30分钟内。
             self.write(json.dumps(record.getchatrecord(room,20)))
+            sysmsg(room,'用户 '+user+' 进入房间')
         elif _cmd == 'LEAVE':
             uuid = self.get_secure_cookie('alice')
             if not uuid:return
@@ -55,14 +67,9 @@ class msg(tornado.web.RequestHandler):
         if not room: return
         if not room in self.callbacks:
             self.callbacks[room] = set()
-            users[room] = dict()
         user = session['user']
         # 添加至回调列表
         self.callbacks[room].add(self.on_new_msg)
-        # 新用户
-        if not user in users[room]:
-            users[room][user] = []
-            sysmsg(room,'用户 '+user+' 进入房间')
 
     def post(self):
         # 初始化 session
@@ -81,6 +88,7 @@ class msg(tornado.web.RequestHandler):
     def send_msg(room,usr,msgtext,time):
         db.query('insert into chat(room,user,time,msg) values(?,?,?,?)',(room,usr,time,msgtext))
         db.commit()
+        if not room in msg.callbacks:return
         for callback in msg.callbacks[room]:
             callback(usr,msgtext,time)
         msg.callbacks[room] = set()
@@ -88,6 +96,5 @@ class msg(tornado.web.RequestHandler):
     def on_new_msg(self,usr,msg,time):
         if self.request.connection.stream.closed():
             return
-        self.write('{"user":"%s","msg":"%s","time":%d}' % (usr,msg,time))
-        self.finish()
+        self.finish({"user":usr,"msg":msg,"time":time})
 

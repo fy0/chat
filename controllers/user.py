@@ -4,9 +4,10 @@ from __future__ import unicode_literals
 import tornado.web
 import uuid
 
+import record
 from record import users
 from session import Session
-from chat import sysmsg
+from controllers.chat import sysmsg
 
 class login(tornado.web.RequestHandler):
     # 获取信息，检查是否存有 session 等等
@@ -21,6 +22,12 @@ class login(tornado.web.RequestHandler):
         user = self.get_argument('user')
 
         # TODO:用户名检查
+        # 特别说明：用户名机制
+        # 对于匿名用户，允许一名多用。
+        # 一旦其中一个进行了设置，此用户名就变为专有用户名，同一时间只允许存在一个
+        if record.userexist(user):
+            self.finish('+ERR 101')  # 重名
+            return
 
         # 建立 session
         _uuid = self.get_secure_cookie('alice')
@@ -38,6 +45,8 @@ class login(tornado.web.RequestHandler):
         if room and oldusr:
             users[room][user] = users[room][oldusr]
             del users[room][oldusr]
+            if record.userexist(oldusr):
+                record.rename(oldusr,user)
             sysmsg(room,'注意： '+oldusr+' 更名为 '+user)
-        self.write('+OK 100')
+        self.finish('+OK 100')
 

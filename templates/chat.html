@@ -24,10 +24,10 @@
                         setTimeout(getmsg,1000);
                         return;
                     }
-                    var info = eval('('+data+')');
-                    if (info['user']!=user)
-                        addmsg(info['user'],info['msg']);
-                    setTimeout(getmsg,50);
+                    if (data['user']!=user)
+                        addmsg(data['user'],data['msg'],data['time']);
+                    setTimeout(getmsg,0);
+                    scrollapi.end("slow");
                 },
                 error: function(req,sta,er){
                     setTimeout(getmsg,10000);
@@ -49,7 +49,7 @@
             i = 0;
             for (i=0;i<premsgs.length;i++) {
                 if (premsgs[i][0]!='系统消息')
-                    addmsg(premsgs[i][0],premsgs[i][1]);
+                    addmsg(premsgs[i][0],premsgs[i][1],premsgs[i][2]);
             }
             premsgs = 0;
             scrollapi.end("slow");
@@ -58,9 +58,12 @@
     }
 
 function addmsg(user,text,time) {
+    var mydate = new Date();
+    time = time || mydate.toLocaleTimeString();
     var item = $("<div class='msgitem'></div>");
     var img = $('<img src="{{static_url('image/icon_admin.png')}}"></img>');
-    var div = $("<div style='display:none'>"+user+" : "+text+"</div>");
+    var commonTime = time;
+    var div = $('<div style="display:none"><span class="time" style="font-weight:bold;">'+commonTime+'</span><br />'+user+" : "+text+"</div>");
     item.append(img);
     item.append(div);
     scrollapi.addItem(item);
@@ -82,8 +85,7 @@ function sendclick() {
         $("#msgtext").attr("value","");
         scrollapi.end("slow");
     } else {
-        // 准备一个 tooltip;
-        alert("输入内容不能为空！");
+        statbartext('输入内容不能为空！','rgb(250,250,0)');
     }
 }
 

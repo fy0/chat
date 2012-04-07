@@ -24,8 +24,6 @@ class EasyDB:
         cursor = self.conn.cursor()
         result = cursor.execute(*args, **kwargs)
         ret = result.fetchall()
-        if ret and len(ret)==1:
-            return ret[0]
         return ret
 
     def commit(self):
