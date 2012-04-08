@@ -26,13 +26,30 @@
                     }
                     if (data['user']!=user)
                         addmsg(data['user'],data['msg'],data['time']);
-                    setTimeout(getmsg,0);
+                    setTimeout(getmsg,50);
                     scrollapi.end("slow");
                 },
                 error: function(req,sta,er){
                     setTimeout(getmsg,10000);
                 },
             });
+    }
+
+    function showrecord() {
+        if (typeof premsgs=='undefined') {
+            setTimeout(showrecord,500);
+            return;
+        }
+        if (premsgs) {
+            var i;
+            i = 0;
+            for (i=0;i<premsgs.length;i++) {
+                addmsg(premsgs[i][0],premsgs[i][1],premsgs[i][2]);
+            }
+            premsgs = 0;
+            addmsg('系统消息','用户 '+user+' 进入房间');
+            scrollapi.end("slow");
+        }
     }
 
     function jqueryinit() {
@@ -44,16 +61,7 @@
         $('#msgtext').keypress(function(event) {
             if (event.keyCode == 13) sendclick();
         });
-        if (premsgs) {
-            var i;
-            i = 0;
-            for (i=0;i<premsgs.length;i++) {
-                if (premsgs[i][0]!='系统消息')
-                    addmsg(premsgs[i][0],premsgs[i][1],premsgs[i][2]);
-            }
-            premsgs = 0;
-            scrollapi.end("slow");
-        }
+        showrecord();
         getmsg();
     }
 
@@ -78,10 +86,9 @@ function sendclick() {
             return;
         }
         addmsg(user,msg);
-        $.post("/chat/msg",{'user':user,'msg':msg},
-                function(result){
-                    if (result=='+ERR 102') addmsg('系统','上一条消息发送失败');
-                });
+        $.post("/chat/msg",{'user':user,'msg':msg},function(result){
+                if (result=='+ERR 102') addmsg('系统','上一条消息发送失败');
+            });
         $("#msgtext").attr("value","");
         scrollapi.end("slow");
     } else {

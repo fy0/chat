@@ -93,7 +93,7 @@ function itemclick() {
         $(".tag:not(.rht)").fadeTo("slow",0);
         //$("div.tag:not(.rht,#"+this.id+")").fadeTo("slow",0);
         $.post("/chat/room",{'cmd':'ENTER','user':user,'room':room},function(ret) {
-                premsgs = eval('('+ret+')');
+                premsgs = ret['record'];
             });
         $.get("/form/chat",cb_showchatwindow);
         //$(this).fadeTo('slow',0);
@@ -117,6 +117,9 @@ function cb_showchatwindow(result) {
 
 function jqueryinit() {
     // 设置事件
+    $(window).unload(function(){
+        $.post("/chat/room/"+room,{'cmd':'LEAVE','user':user});
+    });
     $('#user').click(userclick);
     $("#about").click(aboutclick);
     $("#quit").click(quitclick);
@@ -128,12 +131,15 @@ function jqueryinit() {
     // 设置浮动层
     $("#user[rel]").overlay({mask: '#000',top:'25%',left:'20%'});
     $.get('/login',function(ret) {
-            user = ret['user'];
-            room = ret['room'];
-            showUserinfo();
-            statbartext('欢迎回来');
+            if (ret['user']) {
+                user = ret['user'];
+                room = ret['room'];
+                $.post("/chat/room/"+room,{'cmd':'LEAVE','user':user});
+                showUserinfo();
+                statbartext('欢迎回来');
+            }
         });
-    getroominfo();
+    refreshinfo();
 }
 
 function activeitem(item,_itemclass) {
@@ -161,7 +167,12 @@ function getroominfo() {
             for (var x in ret) {
                 var item = $('#t'+x);
                 activeitem(item);
-                item.html('<div class="activeItemText"><h2>'+ret[x]['title']+'</h2>'+'在线人数:'+ret[x]['num']+'</div>');
+                if (ret[x]['lastmsg']['msg'].length>11)
+                    var msg = ret[x]['lastmsg']['msg'].replace('\n','').replace('\r','').substring(0,11)+' ...';
+                else
+                    var msg = ret[x]['lastmsg']['msg'];
+
+                $('#t'+x).html('<div class="activeItemText"><h2>'+ret[x]['title']+'</h2>'+msg+'<br />在线人数:'+ret[x]['num']+'</div>');
             }
         });
 }
@@ -184,6 +195,13 @@ function aboutclick() {
 
 function quitclick() {
     window.close();
+    var browser=navigator.appName;
+    if (browser=='Netscape') alert('当前浏览器必须手动关闭窗口');
+}
+
+function refreshinfo() {
+    getroominfo();
+    setTimeout(refreshinfo,3000);
 }
 
 </script>
