@@ -25,10 +25,9 @@
             margin-top:10px;
             border:1px solid #444;
             background-color:#666;
-            padding:5px;
             color:#ddd;
             font-size:12px;
-            width:95%;
+            width:100%;
 
             /* CSS3 spicing */
             text-shadow:1px 1px 1px #000;
@@ -58,59 +57,48 @@
 
 <div id="borderbox">
     <div id="loginform">
-        <p id="topline"><span id="yourname">输入你的名字:  </span><input id="usr"/></p>
-        <button id="btnEnter" onclick="login();" title="开始">Enter</button>
+        <p id="topline">
+            <span id="yourname">输入你的名字:  </span>
+            <input id="username" type="text"/>
+        </p>
+        <p id="topline">
+            <button id="btnEnter" onclick="login();" title="开始">Enter</button>
+        </p>
         <a id="logmsg"></a>
     </div>
 </div>
 
 <script>
     $(document).ready(function (){
-        if (user) {
-            $('#yourname').text('换个名字？ ');
-        }
-        $('#usr').focus();
-        $('#usr').keypress(function(event) {
+        $('#username').focus();
+        $('#username').keypress(function(event) {
             if (event.keyCode == 13) login();
         });
     });
 
-function logintext(text,css) {
-    var logmsg = $('#logmsg');
-    css = css || 'normal';
-    if (css==='normal') logmsg.css('color','rgb(150,255,100)');
-    else if (css==='red') logmsg.css('color','rgb(250,100,50)');
-    logmsg.show();
-    logmsg.text(text);
-    logmsg.fadeOut(3000);
-}
-
-function login() {
-    var usr = $('#usr').attr('value').trim();
-
-    if (!usr) {
-        logintext('输入内容为空！');
-        $('#usr').attr('value','');
-        $('#usr').focus();
-        return;
+    function login_text(text,css) {
+        var logmsg = $('#logmsg');
+        css = css || 'normal';
+        if (css==='normal') logmsg.css('color','rgb(150,255,100)');
+        else if (css==='red') logmsg.css('color','rgb(250,100,50)');
+        logmsg.show();
+        logmsg.text(text);
+        logmsg.fadeOut(3000);
     }
 
-    // 若之前已经有了用户名，改名
-    // 若没有，添加新的
-    var param = {};
-    if (user) param = {"oldusr":user,"user":usr};
-    else param = {"user":usr};
-
-    $.post("/login",param,function(ret){
-        if (ret=='+ERR 101') logintext('登录失败，用户名已被占用','red');
-        else if (ret=='+OK 100') {
-            user = usr;
-            logintext('登录成功，请稍候...');
-            setTimeout("$('#user').overlay().close();",500);
-            showUserinfo();
+    function login() {
+        var username = $("#username").val().trim();
+        if (!username) {
+            login_text("请输入用户名！");
+        } else {
+            if (!conn) connect(username);
+            else {
+                conn.send(JSON.stringify([
+                    ['set_username', username],
+                ]));
+            }
         }
-    });
-}
+    }
 
 </script>
 

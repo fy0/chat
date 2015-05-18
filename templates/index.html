@@ -1,0 +1,163 @@
+
+<%inherit file="base.html"/>
+
+<%block name="header">
+    <style type="text/css" media="all">
+        .m-page-top {
+            margin: 16px 0 8px;
+        }
+    </style>
+</%block>
+
+<div class="box">
+    <h1>聊天室：测试版本</h1>
+    <div id="tagbox" class="tagbox" rel="#topbox">
+        <div id="t1" class="tag black lft">
+            <strong>?</strong>
+        </div>
+        <div id="t2" class="tag black">
+            <strong>?</strong>
+        </div>
+        <div id="user" class="tag green rht">
+            <p><strong><span id="usertext" style="color:black">User</span></strong></p>
+        </div>
+        <div id="t3" class="tag black lft">
+            <strong>?</strong>
+        </div>
+        <div id="t4" class="tag black">
+            <strong>?</strong>
+        </div>
+        <div id="about" class="tag blue rht">
+            <p><strong>About</strong></p>
+        </div>
+        <div id="t5" class="tag black lft">
+            <strong>?</strong>
+        </div>
+        <div id="t6" class="tag black">
+            <strong>?</strong>
+        </div>
+        <div id="quit" class="tag red rht">
+            <p><strong>Quit</strong></p>
+        </div>
+        <div class="topbox" id="topbox">
+            <!-- -->
+        </div>
+        <div id="statbar"></div>
+    </div>
+</div>
+
+
+<%block name="script">
+<script>
+     $(document).ready(function() {
+        $("#quit").click(quit_window);
+	});
+
+    function log(msg) {
+        //var control = $('#log');
+        //control.html(control.html() + msg + '<br/>');
+        //control.scrollTop(control.scrollTop() + 1000);
+        console.log(msg);
+        set_statbar_text(msg);
+    }
+
+    function show_topbox() {
+        $("#topbox").html("");
+        $("#topbox").width($("#tagbox").width()*0.66);
+        $("#topbox").height($("#tagbox").height()-26);
+        $("#topbox").show('slow');
+    }
+
+    function change_quit_to(txt, event) {
+        $("#quit>p>strong").text(txt);
+        $("#quit").unbind("click");
+        $("#quit").click(event);
+    }
+
+    function quit_window() {
+        if (confirm("确认要退出？")) {
+            window.opener=null;
+            window.open('','_self');
+            window.close();
+        }
+    }
+
+    // 点击进入房间
+    $(".tag:not(.rht)").click(function() {
+        if (!conn) {
+            $("#user").click();
+        } else {
+            room_id = this.id[1];
+            $(".tag:not(.rht)").fadeTo("slow",0);
+            //$("div.tag:not(.rht,#"+this.id+")").fadeTo("slow",0);
+
+            conn.send(JSON.stringify([
+                ['enter_room', room_id],
+            ]));
+
+            set_statbar_text('Watting ...');
+        }
+    });
+
+    // 进入房间，在回收到 enter_room 指令后被回调
+    function enter_room(room_id) {
+        $.get("/chat",function(result) {
+            $("#topbox").html(result);
+        });
+        show_topbox();
+        set_statbar_text('已进入房间 ' + room_id);
+
+        change_quit_to("Back", leave_room);
+    }
+
+    // 隐藏弹出窗口
+    function hide_topbox() {
+        $("#topbox").hide();
+    }
+
+    // 按返回键
+    function do_back() {
+        change_quit_to("Quit", quit_window);
+        $(".tag:not(.rht)").fadeTo("slow",1);
+        $("#topbox").hide();
+        set_statbar_text('返回');
+    }
+
+    // 离开房间
+    function leave_room() {
+        change_quit_to("Quit", quit_window);
+        $(".tag:not(.rht)").fadeTo("slow",1);
+        $("#topbox").hide();
+        //$.post("/chat/room/"+room,{'cmd':'LEAVE','user':user});
+        set_statbar_text('返回');
+    }
+
+    function set_statbar_text(s, fontcolor) {
+        fontcolor = fontcolor || 'rgb(180,255,20)';
+        var statbar = $('#statbar');
+        statbar.stop(true,true).hide();
+        statbar.text(s);
+        statbar.css('color',fontcolor);
+        statbar.fadeIn(1000).delay(1000);
+        statbar.fadeOut(1000);
+    }
+
+    $("#user").click(function () {
+        show_topbox();
+        $.get("/login",function(result) {
+            $("#topbox").html(result);
+        });
+        change_quit_to("Back", do_back);
+        set_statbar_text('登录');
+    });
+
+    $("#about").click(function() {
+        show_topbox();
+        $.get("/about",function(result) {
+            $("#topbox").html(result);
+        });
+        change_quit_to("Back", do_back);
+        set_statbar_text('关于页面');
+    });
+</script>
+</%block>

@@ -5,17 +5,29 @@
 
 .sendmsg {
     float:bottom;
-    width:99%;
     height:15%;
-    border:1px solid white;
+    border-top:1px solid white;
+}
+
+#msg_text {
+    width: 100%;
+    height: 100%;
+    border: 0px;
+    border-bottom-left-radius: 6px;
+}
+
+#msg_text_box {
+    height: 99%;
+    margin-right: 50px;
 }
 
 #sendbtn {
     float:right;
-    width:12%;
+    width:50px;
     height:100%;
     text-align:center;
     line-height:50px;
+    text-decoration: none;
 }
 
 #sendbtn:hover {

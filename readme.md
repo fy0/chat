@@ -5,10 +5,21 @@ LICENSE : WTFPL
 A chat hub with **python-tornado**.  
 
 ## feature:
-It can be run.  
 Work with both py2 and 3
 
+## requirements
+tornado
+sockjs-tornado
+mako
+peewee
+
 ## 更新记录
+
+### v0.1 [2015.5.18]
+很多时光过去了。回望过去的几年，其实我也有些惭愧。  
+不管怎么说，如今的我相比当时成长了一些。  
+现在我来重写这个项目了。
+所有功能重写，此版本只保证能够聊天。
 
 ### v0.04 [2012.4.8]
 现在可以从外面看到房间内的人数和最后一句发言  
