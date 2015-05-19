@@ -10,17 +10,27 @@ class Room(object):
         self.users = set()
 
 
+@route('/room_info', name='room_info')
+class RoomInfo(View):
+    def get(self):
+        ret = {}
+        for k, v in ChatConnection.rooms.items():
+            if len(v.users):
+                ret[k] = {'title': 'Room %s' % k, 'num':len(v.users)}
+        self.finish(ret)
+
+
 class ChatConnection(SockJSConnection):
-    visitors = set()
     rooms = {}
+    visitors = set()
     uid_start = 1000
 
     def on_open(self, request):
         self.uid = self.uid_start
-        self.uid_start += 1
         self.room_id = None
         self.username = None
         self.visitors.add(self)
+        ChatConnection.uid_start += 1
 
     def on_close(self):
         self.leave_room()
@@ -47,10 +57,10 @@ class ChatConnection(SockJSConnection):
     def leave_room(self):
         if self.room_id in self.rooms:
             r = self.rooms[self.room_id]
-            r.users.remove(self)
 
             self.broadcast(r.users, json.dumps([['leave_room', self.room_id, [self.uid, self.username]]]))
 
+            r.users.remove(self)
             if len(r.users) == 0:
                 del self.rooms[self.room_id]
 
@@ -69,7 +79,7 @@ class ChatConnection(SockJSConnection):
                     self.enter_room(int(i[1]))
             elif key == 'leave_room':
                 if self.username:
-                    self.leave_room(int(i[1]))
+                    self.leave_room()
             elif key == 'say':
                 if self.username:
                     self.say(i[1])

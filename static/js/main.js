@@ -3,6 +3,10 @@ var conn = null;
 var uid = null;
 var username = null;
 
+function get_user_str(user) {
+    return user[1] + ' [' + user[0] + ']';
+}
+
 function connect(the_username) {
     disconnect();
 
@@ -33,7 +37,18 @@ function connect(the_username) {
                 username = info[1][1];
                 log("登录成功!");
             } else if (info[0] == 'enter_room') {
-                enter_room(info[1]);
+                if (info[2][0] == uid) {
+                    enter_room(info[1]);
+                } else {
+                    add_msg([0, "系统消息"], get_user_str(info[2]) + " 进入房间");
+                }
+            } else if (info[0] == 'leave_room') {
+                var user_info = info[2];
+                if (user_info[0] == uid)
+                    do_leave_room();
+                else {
+                    add_msg([0, "系统消息"], get_user_str(info[2]) + " 离开房间");
+                }
             } else if (info[0] == 'say') {
                 add_msg(info[1], info[2]);
             }

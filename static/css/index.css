@@ -5,23 +5,21 @@ body {
 
 div.box {
     margin:5%;
-    margin-left:7%;
 }
 
 div.tagbox {
-    margin:1%;
     height:432px;
     width:700px;
     background:#333;
     padding:15px 20px;
     color:#eee;
-    margin:0;
+    margin:1% auto;
     border-radius: 6px;
 }
 
 div.box h1 {
-    text-indent:7%;
     font-size:30px;
+    text-align: center;
 }
 
 div.box .tag {

@@ -10,7 +10,7 @@
 </%block>
 
 <div class="box">
-    <h1>聊天室：测试版本</h1>
+    <h1>有间聊天室</h1>
     <div id="tagbox" class="tagbox" rel="#topbox">
         <div id="t1" class="tag black lft">
             <strong>?</strong>
@@ -49,8 +49,9 @@
 
 <%block name="script">
 <script>
-     $(document).ready(function() {
+    $(document).ready(function() {
         $("#quit").click(quit_window);
+        refresh_info();
 	});
 
     function log(msg) {
@@ -123,13 +124,61 @@
         set_statbar_text('返回');
     }
 
-    // 离开房间
+    // 离开房间（发指令）
     function leave_room() {
+        if (conn) {
+            conn.send(JSON.stringify([
+                ['leave_room'],
+            ]));
+        }
+    }
+
+    // 离开房间（被回调）
+    function do_leave_room() {
         change_quit_to("Quit", quit_window);
         $(".tag:not(.rht)").fadeTo("slow",1);
         $("#topbox").hide();
-        //$.post("/chat/room/"+room,{'cmd':'LEAVE','user':user});
         set_statbar_text('返回');
+    }
+
+    // 激活房间号
+    function active_item(item,_itemclass) {
+        if(typeof itemclass=='undefined'){
+            itemclass = 'none';
+        }
+        switch (item.attr('id')[1]) {
+            case '2':case '3':case '6':itemclass='blue';break;
+            case '1':case '4':case '5':itemclass='red';break;
+        }
+        item.removeClass('black').addClass(itemclass);
+    }
+
+    // 获取房间信息
+    function get_room_info() {
+        $.get('/room_info', function(ret){
+            $(".tag:not(.rht)").html("<strong>?</strong>");
+            $(".tag:not(.rht)").removeClass('red');
+            $(".tag:not(.rht)").removeClass('blue');
+            $(".tag:not(.rht)").addClass('black');
+
+            for (var x in ret) {
+                var item = $('#t'+x);
+                active_item(item);
+                /*if (ret[x]['lastmsg']['msg'].length>11)
+                    var msg = ret[x]['lastmsg']['msg'].replace('\n','').replace('\r','').substring(0,11)+' ...';
+                else
+                    var msg = ret[x]['lastmsg']['msg'];*/
+                msg = '';
+
+                $('#t'+x).html('<div class="activeItemText"><h2>'+ret[x]['title']+'</h2>'+msg+'<br />在线人数:'+ret[x]['num']+'</div>');
+            }
+        });
+    }
+
+    // 刷新信息
+    function refresh_info() {
+        get_room_info();
+        setTimeout(refresh_info, 3000);
     }
 
     function set_statbar_text(s, fontcolor) {
