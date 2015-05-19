@@ -51,6 +51,9 @@
 <script>
     $(document).ready(function() {
         $("#quit").click(quit_window);
+        $.get("/i_am_here", function(result) {
+            connect(null, result.key);
+        });
         refresh_info();
 	});
 
@@ -135,6 +138,7 @@
 
     // 离开房间（被回调）
     function do_leave_room() {
+        get_room_info();
         change_quit_to("Quit", quit_window);
         $(".tag:not(.rht)").fadeTo("slow",1);
         $("#topbox").hide();

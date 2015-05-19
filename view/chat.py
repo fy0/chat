@@ -1,14 +1,11 @@
 # coding:utf-8
 
 import json
+import uuid
 from view import route, url_for, View
 from sockjs.tornado import SockJSRouter, SockJSConnection
 
-
-class Room(object):
-    def __init__(self):
-        self.users = set()
-
+key_to_user_info = {}
 
 @route('/room_info', name='room_info')
 class RoomInfo(View):
@@ -19,6 +16,29 @@ class RoomInfo(View):
                 ret[k] = {'title': 'Room %s' % k, 'num':len(v.users)}
         self.finish(ret)
 
+@route('/my_info', name='my_info')
+class MyInfo(View):
+    def post(self):
+        uid = self.get_argument('uid')
+        username = self.get_argument('username')
+        self.set_secure_cookie('alice', json.dumps({'uid': uid, 'username': username, 'key': uuid.uuid4().hex}))
+        self.finish({'code': 0})
+
+@route('/i_am_here', name='i_am_here')
+class Hello(View):
+    def get(self):
+        info = json.loads(self.get_secure_cookie('alice').decode('utf-8') or '{}')
+        if 'key' in info:
+            key_to_user_info[info['key']] = info
+            self.finish({'key': info['key']})
+        else:
+            self.finish({})
+
+
+class Room(object):
+    def __init__(self):
+        self.users = set()
+
 
 class ChatConnection(SockJSConnection):
     rooms = {}
@@ -26,10 +46,12 @@ class ChatConnection(SockJSConnection):
     uid_start = 1000
 
     def on_open(self, request):
-        self.uid = self.uid_start
         self.room_id = None
         self.username = None
         self.visitors.add(self)
+
+        self.uid = self.uid_start
+        self.session.uid = self.uid
         ChatConnection.uid_start += 1
 
     def on_close(self):
@@ -83,8 +105,13 @@ class ChatConnection(SockJSConnection):
             elif key == 'say':
                 if self.username:
                     self.say(i[1])
-            elif key == 'room_list':
-                pass
+            elif key == 'rebirth':
+                if i[1] in key_to_user_info:
+                    k = i[1]
+                    self.uid = key_to_user_info[k]['uid']
+                    self.username = key_to_user_info[k]['username']
+                    del key_to_user_info[k]
+                    self.broadcast([self], json.dumps([['user_info', [self.uid, self.username]]]))
 
 
 chat_route = SockJSRouter(ChatConnection, '/ws/api')

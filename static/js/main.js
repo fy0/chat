@@ -7,7 +7,12 @@ function get_user_str(user) {
     return user[1] + ' [' + user[0] + ']';
 }
 
-function connect(the_username) {
+function getCookie(name) {
+    var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+    return r ? r[1] : undefined;
+}
+
+function connect(the_username, the_key) {
     disconnect();
 
     var transports = [
@@ -25,6 +30,11 @@ function connect(the_username) {
                 ['set_username', the_username],
             ]));
         }
+        if (the_key) {
+            conn.send(JSON.stringify([
+                ['rebirth', the_key],
+            ]));
+        }
     };
 
     conn.onmessage = function(e) {
@@ -38,6 +48,9 @@ function connect(the_username) {
                 $("#usertext").text(username);
                 $("#user").unbind('click');
                 log("登录成功!");
+                $.post("/my_info", {'_xsrf': getCookie("_xsrf"), "uid":uid, "username":username}, function(result) {
+                    ;
+                });
             } else if (info[0] == 'enter_room') {
                 if (info[2][0] == uid) {
                     enter_room(info[1]);
