@@ -1,7 +1,7 @@
 # coding:utf-8
 
 PORT = 9000
-DEBUG = True
+DEBUG = False
 TITLE = 'chat'
 TEMPLATE = 'mako'  # jinja2/mako/tornado
 DATABASE_URI = "sqlite:///database.db"

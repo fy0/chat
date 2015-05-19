@@ -35,6 +35,8 @@ function connect(the_username) {
                 hide_topbox();
                 uid = info[1][0];
                 username = info[1][1];
+                $("#usertext").text(username);
+                $("#user").unbind('click');
                 log("登录成功!");
             } else if (info[0] == 'enter_room') {
                 if (info[2][0] == uid) {
