@@ -52,7 +52,9 @@
     $(document).ready(function() {
         $("#quit").click(quit_window);
         $.get("/i_am_here", function(result) {
-            connect(null, result.key);
+            if (result.key) {
+                connect(null, result.key);
+            }
         });
         refresh_info();
 	});
@@ -92,7 +94,6 @@
             $("#user").click();
         } else {
             room_id = this.id[1];
-            $(".tag:not(.rht)").fadeTo("slow",0);
             //$("div.tag:not(.rht,#"+this.id+")").fadeTo("slow",0);
 
             conn.send(JSON.stringify([
@@ -105,6 +106,7 @@
 
     // 进入房间，在回收到 enter_room 指令后被回调
     function enter_room(room_id) {
+        $(".tag:not(.rht)").fadeTo("slow",0);
         $.get("/chat",function(result) {
             $("#topbox").html(result);
         });
