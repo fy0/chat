@@ -27,7 +27,7 @@ class MyInfo(View):
 @route('/i_am_here', name='i_am_here')
 class Hello(View):
     def get(self):
-        info = json.loads(self.get_secure_cookie('alice').decode('utf-8') or '{}')
+        info = json.loads((self.get_secure_cookie('alice') or '{}').decode('utf-8'))
         if 'key' in info:
             key_to_user_info[info['key']] = info
             self.finish({'key': info['key']})

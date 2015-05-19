@@ -1,6 +1,6 @@
 # coding:utf-8
 
-PORT = 9000
+PORT = 3456
 DEBUG = False
 TITLE = 'chat'
 TEMPLATE = 'mako'  # jinja2/mako/tornado
