@@ -8,12 +8,18 @@ A chat hub with **python-tornado**.
 Work with both py2 and 3
 
 ## requirements
+mako
 tornado
 sockjs-tornado
-mako
-peewee
+
 
 ## 更新记录
+
+### v0.2 [2015.5.19]
+重新加入了记住用户身份
+重新加入广播进入退出房间信息
+重新加入显示用户名
+移除了其实并没有用到的model
 
 ### v0.1 [2015.5.18]
 很多时光过去了。回望过去的几年，其实我也有些惭愧。  

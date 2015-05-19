@@ -8,7 +8,6 @@ from sys import argv
 
 import config
 import view.views
-import model.models
 from view import route
 from view.chat import chat_route
 
